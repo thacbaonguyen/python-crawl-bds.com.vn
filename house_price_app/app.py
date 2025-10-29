@@ -87,13 +87,29 @@ def metadata():
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    data = request.get_json()
+
+    area = data.get("area", None)
+    bedroom = data.get("bedroom", None)
+    wc = data.get("wc", None)
+    published_date = data.get("published_date", None)
+    location = data.get("location", "")
+    home_type = data.get("home_type", "")
+    legal_status = data.get("legal_status", "")
+    furniture = data.get("furniture", "")
+
+    ht_norm = home_type.lower().strip()
+    if ht_norm in ["đất", "đất nền"]:
+        bedroom = 0
+        wc = 0
+
     try:
         data = request.get_json(silent=True) or request.form.to_dict()
         # Build vector & predict
         x = build_vector(data)
         log_p = float(x.dot(weights) + bias)
         price = float(np.exp(log_p))
-        return jsonify({"ok": True, "predicted_price_vnd": round(price)})
+        return jsonify({"ok": True, "predicted_price_vnd": price})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 400
 

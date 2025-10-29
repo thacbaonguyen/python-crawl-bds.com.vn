@@ -71,7 +71,7 @@
     </div>
 
     <div id="output" class="card" style="display:none;">
-      <div class="result">Giá dự đoán: <span id="price"></span>tỷ VND</div>
+      <div class="result">Giá dự đoán: <span id="price"></span> tỷ VND</div>
       <div class="muted">*Lưu ý: kết quả ước tính từ dữ liệu lịch sử, chỉ mang tính tham khảo.</div>
     </div>
 
@@ -90,12 +90,44 @@
         fill('home_type', meta.choices.home_type || []);
         fill('legal_status', meta.choices.legal_status || []);
         fill('furniture', meta.choices.furniture || []);
+
+        const homeTypeEl = document.getElementById('home_type');
+        const bedroomEl = document.getElementById('bedroom');
+        const wcEl = document.getElementById('wc');
+
+        function enforceForLand() {
+        const val = (homeTypeEl.value || '').toLowerCase().trim();
+        const isLand = (val === 'đất' || val === 'đất nền');
+
+          if (isLand) {
+            bedroomEl.value = 0;
+            wcEl.value = 0;
+            bedroomEl.readOnly = true;
+            wcEl.readOnly = true;
+            bedroomEl.style.backgroundColor = '#f3f4f6';
+            wcEl.style.backgroundColor = '#f3f4f6';
+          } else {
+            bedroomEl.readOnly = false;
+            wcEl.readOnly = false;
+            bedroomEl.style.backgroundColor = '';
+            wcEl.style.backgroundColor = '';
+          }
+        }
+
+        enforceForLand();
+
+        homeTypeEl.addEventListener('change', enforceForLand);
       }
       loadMeta();
 
       document.getElementById('form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = Object.fromEntries(new FormData(e.target).entries());
+        const ht = (payload.home_type || '').toLowerCase().trim();
+          if (ht === 'đất' || ht === 'đất nền') {
+            payload.bedroom = 0;
+            payload.wc = 0;
+          }
         const res = await fetch('/predict', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         const data = await res.json();
         const out = document.getElementById('output');
