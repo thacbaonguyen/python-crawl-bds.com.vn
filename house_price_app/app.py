@@ -2,10 +2,8 @@ from flask import Flask, render_template, request, jsonify
 import numpy as np, json, os
 from pathlib import Path
 
-# Dùng chính thư mục chứa app.py để tìm model/artifacts
 ART_DIR = Path(__file__).resolve().parent
 
-# Load artifacts (dùng Path thay vì string để tránh lỗi path)
 weights = np.load(ART_DIR / "weights.npy")
 bias = float(np.load(ART_DIR / "bias.npy")[0])
 
